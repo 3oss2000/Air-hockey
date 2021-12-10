@@ -8,11 +8,28 @@ public class playerMovement : MonoBehaviour
     Vector2 playerSize;
     Rigidbody2D rb;
 
+    public Transform limits;
+
+    limit playerLimit;
+    struct limit
+    {
+        public float up, down, left, right;
+
+        public limit(float Up, float Down, float Left, float Right)
+        {
+            up = Up;
+            down = Down;
+            left = Left;
+            right = Right;
+
+        }
+    }
     void Start()
     {
         playerSize = GetComponent<SpriteRenderer>().bounds.extents;
         rb = GetComponent<Rigidbody2D>();
 
+        playerLimit = new limit(limits.GetChild(0).position.y,limits.GetChild(1).position.y,limits.GetChild(2).position.x,limits.GetChild(3).position.x);
     }
 
     // Update is called once per frame
@@ -35,7 +52,8 @@ public class playerMovement : MonoBehaviour
             }
             if (canMove)
             {
-                rb.MovePosition(mousePos);
+                Vector2 clampedMousePos = new Vector2(Mathf.Clamp(mousePos.x, playerLimit.left ,playerLimit.right),Mathf.Clamp(mousePos.y, playerLimit.down,playerLimit.up));
+                rb.MovePosition(clampedMousePos);
             }
         }
         else
