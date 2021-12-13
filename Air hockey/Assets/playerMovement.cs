@@ -11,7 +11,7 @@ public class playerMovement : MonoBehaviour
     public Transform limits;
 
     limit playerLimit;
-    struct limit
+    public struct limit
     {
         public float up, down, left, right;
 
