@@ -34,27 +34,30 @@ public class ai : MonoBehaviour
 
     private void FixedUpdate()
     {
-        float movementSpeed;
-
-        if (ball.position.y < ballLimit.down)
+        if (!Ball.WasGoal) //to stop the ai if there is a goal scored
         {
-            if (isFirstTimeInOpponentsHalf)
+            float movementSpeed;
+
+            if (ball.position.y < ballLimit.down)
             {
-                isFirstTimeInOpponentsHalf = false;
-                offsetXFromTarget = Random.Range(-1f, 1f); //randomizing the offset to make the game smooth
+                if (isFirstTimeInOpponentsHalf)
+                {
+                    isFirstTimeInOpponentsHalf = false;
+                    offsetXFromTarget = Random.Range(-1f, 1f); //randomizing the offset to make the game smooth
+                }
+
+                movementSpeed = MaxMovementSpeed * Random.Range(0.1f, 0.3f); //randomizing the speed to make the game more smoother while returning
+                targetPosition = new Vector2(Mathf.Clamp(ball.position.x + offsetXFromTarget, playerLimit.left, playerLimit.right), startingPosition.y); //returning to starting y position
+            }
+            else
+            {
+                isFirstTimeInOpponentsHalf = true;
+
+                movementSpeed = Random.Range(MaxMovementSpeed * 0.4f, MaxMovementSpeed); //set the speed to the max speed
+                targetPosition = new Vector2(Mathf.Clamp(ball.position.x, playerLimit.left, playerLimit.right), Mathf.Clamp(ball.position.y, playerLimit.down, playerLimit.up)); //go to the ball postion
             }
 
-            movementSpeed = MaxMovementSpeed * Random.Range(0.1f, 0.3f); //randomizing the speed to make the game more smoother while returning
-            targetPosition = new Vector2(Mathf.Clamp(ball.position.x + offsetXFromTarget, playerLimit.left, playerLimit.right), startingPosition.y); //returning to starting y position
+            rb.MovePosition(Vector2.MoveTowards(rb.position, targetPosition, movementSpeed * Time.fixedDeltaTime)); //here we move
         }
-        else
-        {
-            isFirstTimeInOpponentsHalf = true;
-
-            movementSpeed = Random.Range(MaxMovementSpeed * 0.4f, MaxMovementSpeed); //set the speed to the max speed
-            targetPosition = new Vector2(Mathf.Clamp(ball.position.x, playerLimit.left, playerLimit.right), Mathf.Clamp(ball.position.y, playerLimit.down, playerLimit.up)); //go to the ball postion
-        }
-
-        rb.MovePosition(Vector2.MoveTowards(rb.position, targetPosition, movementSpeed * Time.fixedDeltaTime)); //here we move
     }
 }

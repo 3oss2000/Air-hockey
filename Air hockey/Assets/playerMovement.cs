@@ -5,12 +5,13 @@ public class playerMovement : MonoBehaviour
     // Start is called before the first frame update
     bool isClicked = true;
     bool canMove;
-    Vector2 playerSize;
     Rigidbody2D rb;
 
     public Transform limits;
+    private Vector2 startingPosition;
 
     limit playerLimit;
+    Collider2D PlayerCollider;
     public struct limit
     {
         public float up, down, left, right;
@@ -26,39 +27,45 @@ public class playerMovement : MonoBehaviour
     }
     void Start()
     {
-        playerSize = GetComponent<SpriteRenderer>().bounds.extents;
         rb = GetComponent<Rigidbody2D>();
-
-        playerLimit = new limit(limits.GetChild(0).position.y,limits.GetChild(1).position.y,limits.GetChild(2).position.x,limits.GetChild(3).position.x);
+        PlayerCollider = GetComponent<Collider2D>();
+        startingPosition = rb.position;
+        playerLimit = new limit(limits.GetChild(0).position.y, limits.GetChild(1).position.y, limits.GetChild(2).position.x, limits.GetChild(3).position.x);
     }
 
     // Update is called once per frame
     void Update()
     {
-        if (Input.GetMouseButton(0))
+        if (!Ball.WasGoal)
         {
-            Vector2 mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-            if (isClicked)
+            if (Input.GetMouseButton(0))
             {
-                isClicked = false;
-                if ((mousePos.x >= transform.position.x && mousePos.x < transform.position.x + playerSize.x || mousePos.x <= transform.position.x && mousePos.x > transform.position.x - playerSize.x) && (mousePos.y >= transform.position.y && mousePos.y < transform.position.y + playerSize.y || mousePos.y <= transform.position.y && mousePos.y > transform.position.y - playerSize.y))
+                Vector2 mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+                if (isClicked)
                 {
-                    canMove = true;
+                    isClicked = false;
+                    if (PlayerCollider.OverlapPoint(mousePos))
+                    {
+                        canMove = true;
+                    }
+                    else
+                    {
+                        canMove = false;
+                    }
                 }
-                else
+                if (canMove)
                 {
-                    canMove = false;
+                    Vector2 clampedMousePos = new Vector2(Mathf.Clamp(mousePos.x, playerLimit.left, playerLimit.right), Mathf.Clamp(mousePos.y, playerLimit.down, playerLimit.up));
+                    rb.MovePosition(clampedMousePos);
                 }
             }
-            if (canMove)
+            else
             {
-                Vector2 clampedMousePos = new Vector2(Mathf.Clamp(mousePos.x, playerLimit.left ,playerLimit.right),Mathf.Clamp(mousePos.y, playerLimit.down,playerLimit.up));
-                rb.MovePosition(clampedMousePos);
+                isClicked = true;
             }
         }
-        else
-        {
-            isClicked = true;
+        else{
+            rb.position = startingPosition; //to return the player to the main position after we enter a goal
         }
     }
 }
